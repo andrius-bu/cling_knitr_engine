@@ -19,7 +19,7 @@ Note that this is a very barebones guide, which takes less priority, as there is
 
 + Start by downloading [VirtualBox](https://www.virtualbox.org/wiki/Downloads) as well as the expansion pack:
 
-    ![](./_img/pic_vb_01.png)
+    ![](./_img/pic_vb_01.PNG)
 
 + Install VirtualBox and the expansion pack.
 
@@ -27,13 +27,13 @@ Note that this is a very barebones guide, which takes less priority, as there is
 
 + Open VirtualBox and click 'New'. Then, set a name and version for this VM:
 
-    ![](./_img/pic_01.png)
+    ![](./_img/pic_01.PNG)
 
 + Select the amount of RAM that you want to allocate to this machine.
 + Select the type of virtual harddrive (default - VDI). As for the size - I have used 20 GB (might work with 10 GB, unless you want to compile `cling` yourself - then > 50 GB might be needed).
 + When installing Ubuntu, select the minimal installation size and not to download any updates while installing. This will speed up the installation process and we can always update later.
 
-    ![](./_img/pic_vb_04.png)
+    ![](./_img/pic_vb_04.PNG)
 
 </details>
 
@@ -50,15 +50,15 @@ sudo apt-get update && sudo apt-get install -y virtualbox-guest-x11
 
 Then, in VirtualBox, in the guest os window, click `Machine -> Settings`:
 
-![](./_img/pic_vb_05.png)
+![](./_img/pic_vb_05.PNG)
 
 In `General`, select the `Advanced` tab and change `Shared Clipboard`
 
-![](./_img/pic_vb_06.png)
+![](./_img/pic_vb_06.PNG)
 
  to be `Bidirectional`:
 
-![](./_img/pic_vb_07.png)
+![](./_img/pic_vb_07.PNG)
 
 Finally, enable the clipboard between the guest and host os by executing the following command:
 
@@ -76,15 +76,15 @@ To test this, you can try copying some text from you host machine, and verifying
 
 <b>Power off your Guest Machine</b>, then select it in VirtualBox and click `Settings`:
 
-![](./_img/pic_vb_10.png)
+![](./_img/pic_vb_10.PNG)
 
 Click on `Shared Folders` on the left panel and the `+` button on the right side:
 
-![](./_img/pic_vb_11.png)
+![](./_img/pic_vb_11.PNG)
 
 Select a folder on your Host machine, which you want to share with the guest machine - this will let you directly save and edit files from your own machine, from inside the VM. Make sure that:
 
-![](./_img/pic_vb_12.png)
+![](./_img/pic_vb_12.PNG)
 
 Note that on your guest OS in ubuntu this will be in `/media/sf_<name_of_folder>`, where `<name_of_folder>` is the folder name that you specified in the above picture.
 
@@ -98,17 +98,17 @@ You will need to reboot the guest OS - you can do this by writing ```sudo reboot
 
 Once it finishes rebooting, open the file explorer on the guest machine and click `+ Other Locations` then select `Computer`:
 
-![](./_img/pic_vb_13.png)
+![](./_img/pic_vb_13.PNG)
 
 Then, go to the `media` folder, where you will see the `sf_<name_of_folder>`:
 
-![](./_img/pic_vb_14_1.png)
+![](./_img/pic_vb_14_1.PNG)
 
 Double clicking it should open the folder. 
 
 If you will see the folder with a red `X`:
 
-![](./_img/pic_vb_14_2.png)
+![](./_img/pic_vb_14_2.PNG)
 
 
 It will probably ask you for your guest OS user password - input it and you should see the folder contents. <i>
@@ -128,7 +128,7 @@ This repository has a number bash scripts in `_scripts` folder, which dowloads a
 
 Right-clicking inside the shared folder and selecting `Open in Terminal` allows you to easily open the terminal in that directory
 
-![](./_img/pic_vb_15.png)
+![](./_img/pic_vb_15.PNG)
 
 and run the scripts as follows (one-by-one):
 
@@ -140,7 +140,7 @@ and run the scripts as follows (one-by-one):
 
 Finally, `reboot` the guest OS. After reboot, open the terminal and verify that you can call `cling` from the terminal:
 
-![](./_img/pic_vb_16.png)
+![](./_img/pic_vb_16.PNG)
 
 Verify that `C++` code works in `cling`:
 
