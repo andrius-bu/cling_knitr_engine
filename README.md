@@ -171,5 +171,5 @@ The (very preliminary) `knitr` language engine for `cling` is provided in the `s
  Various TODO's:
 
  * [ ] Ability to pass the name of the terminal, thereby allowing multiple terminals with different sessions.
- * [ ] Saving plots (most likely similar sollution to [KnitR/Octave](https://en.wikiversity.org/wiki/KnitR/Octave)
+ * [ ] Saving plots (most likely a similar solution to [KnitR/Octave](https://en.wikiversity.org/wiki/KnitR/Octave)
  * [ ] Caching. See [ROOT files](https://root.cern.ch/root/html534/guides/users-guide/InputOutput.html) for a possible solution.
