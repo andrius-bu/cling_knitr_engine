@@ -146,11 +146,9 @@ You can quit the terminal with ```.q```
 
 ## The `knitr` language engine for `cling`
 
-The (very preliminary) `knitr` language engine for `cling` is provided in the `src` folder. The example of this engine is provided in the `examples` folder.
+The example of this engine is provided in the `examples` folder. The (very preliminary) `knitr` language engine for `cling` is provided in the `src` folder (<b> Note - currently the language engine is in the `examples`.</b>). 
 
-<b> Note - currently the language engine is in the `examples`.</b>
-
- The [custom language engine](https://bookdown.org/yihui/rmarkdown-cookbook/custom-engine.html) is based on `rstudioapi`, which allows passing the input to a terminal, therefore allowing for a persistant `cling` session, i.e. variables persist throughout the different chunks. Optionally, passing `engine.opts = list(cling = 'ClearClingEnv')` tells the `cling` language engine to close the current terminal and open a new one.
+ The [custom language engine](https://bookdown.org/yihui/rmarkdown-cookbook/custom-engine.html) is based on `rstudioapi`, which allows passing the input to a terminal, therefore allowing for a persistant `cling` session, i.e. variables persist throughout the different chunks. Optionally, passing `engine.opts = list(cling = 'ClearClingEnv')` tells the `cling` language engine to quit `cling`, close the current terminal and open a new one.
 
  ## <span style="color:red">IMPORTANT!</span> Current Limitations
 
