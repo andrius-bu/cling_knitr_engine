@@ -156,11 +156,13 @@ You can quit the terminal with ```.q```
 
 The (very preliminary) `knitr` language engine for `cling` is provided in the `src` folder. The example of this engine is provided in the `examples` folder.
 
+<b> Note - currently the language engine is in the `examples`.</b>
+
  The [custom language engine](https://bookdown.org/yihui/rmarkdown-cookbook/custom-engine.html) is based on `rstudioapi`, which allows passing the input to a terminal, therefore allowing for a persistant `cling` session, i.e. variables persist throughout the different chunks. Optionally, passing `engine.opts = list(cling = 'ClearClingEnv')` tells the `cling` language engine to close the current terminal and open a new one.
 
  ## <span style="color:red">IMPORTANT!</span> Current Limitations
 
- See [rstudio#6892](https://github.com/rstudio/rstudio/issues/6892#issuecomment-630267412) - `knitr` creates a new session, therefore `rstudioapi` cannot find an active `rstudio` app. To account for this, use `rmarkdown::render(my_rmd_file.rmd)` (or similar) to render your file in RStudio's `R` command prompt.
+ See [rstudio#6892](https://github.com/rstudio/rstudio/issues/6892#issuecomment-630267412) - `knitr` creates a new session, therefore `rstudioapi` cannot find an active `rstudio` app. To account for this, use `rmarkdown::render(my_rmd_file.rmd)` (or similar) to render your file in RStudio's `R` Console.
 
  Alternatively, `system2(...)` can be used instead of `rstudioapi`. However, a persistent session will not be available - you would need to find a way to [serialize objects in C++](https://isocpp.org/wiki/faq/serialization). I haven't tried this, so I cannot say how efficient this would be compared to the current setup.
 
