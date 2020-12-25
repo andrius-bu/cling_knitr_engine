@@ -9,6 +9,9 @@ sudo apt-get install -y r-base
 # Install some R packages
 sudo R -e 'install.packages("knitr")'
 sudo R -e 'install.packages("rmarkdown")'
+sudo R -e 'install.packages("rstudioapi")'
+sudo R -e 'install.packages("crayon")'
+sudo R -e 'install.packages("fansi")'
 
 ## RStudio
 sudo apt-get install -y gdebi-core
