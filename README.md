@@ -1,10 +1,10 @@
 # `knitr` language engine for `cling`
 
-Allows writing `C++` code chunks inside `RMarkdown`, compiling the chunks via `cling` and generating RMakrdown documents.
+Allows running `C++` code chunks inside `RMarkdown`, executing the chunks via `rstudioapi` in a persistent `cling` session.
 
 ## Setting up VirtualBox
 
-Note that this is a very barebones guide, which takes less priority, as there is ample info on the web on how to do this.
+Note that currently this is a very barebones guide.
 
 <details>
 <summary>(click to collapse) Installing VirtualBox and Creating an Ubuntu Guest OS:</summary>
@@ -116,13 +116,13 @@ You can try to create an empty folder there - you should see any new files and f
 
 ## Downloading `cling`, `r` and `rstudio`
 
-This repository has a number bash scripts in `_scripts` folder, which dowloads all of the required packages(currently might include some unnecessary ones as well) to install `r`, `rstudio`, `cling`. It also moves `cling` to your `home` directory and adds it to the `PATH`. 
+This repository has a number bash scripts in `scripts` folder, which dowloads all of the required packages(currently might include some unnecessary ones as well) to install `r`, `rstudio`, `cling`. It also moves `cling` to your `/home/$USER/Apps` directory and adds it to the `PATH` in the VM. 
 
-Right-clicking inside the shared folder and selecting `Open in Terminal` allows you to easily open the terminal in that directory
+In the guest Os, right-clicking inside the shared folder (between the guest and host OS) and selecting `Open in Terminal` allows you to easily open the terminal in that directory
 
 ![](./_img/pic_vb_15.PNG)
 
-and run the scripts as follows (one-by-one):
+and run the scripts as follows (one-by-one, assuming that they are inside that folder):
 
 ```
 ./00_base_packages.sh
