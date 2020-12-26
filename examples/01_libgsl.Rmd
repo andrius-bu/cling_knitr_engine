@@ -1,0 +1,153 @@
+---
+title: "Example: `cling` with `libgsl`"
+output: 
+  html_document:
+    highlight: haddock
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+**Important!** knit this file by running `rmarkdown::render("01_libgsl.Rmd")` inside the RStudio console.
+
+## Example engine (uses the RStudio API to call the terminal)
+
+Firstly, `cling` returns the errors colored with ANSI shell color codes. To return the colors, instead of the codes, we follow a solution posted in [crayon#24](https://github.com/r-lib/crayon/issues/24#issuecomment-581068792)
+.
+```{r color, echo = TRUE, results='asis'}
+# https://github.com/r-lib/crayon/issues/24#issuecomment-581068792
+# crayon needs to be explicitly activated in Rmd
+options(crayon.enabled = TRUE)
+# Hooks needs to be set to deal with outputs
+# thanks to fansi logic
+old_hooks <- fansi::set_knit_hooks(knitr::knit_hooks, 
+                                   which = c("output", "message", "error"))
+```
+
+Load our language engine:
+
+```{r}
+source("../src/cling.R")
+```
+
+## Installing `libgsl`
+
+Easiest way to install the library, as described [here](https://askubuntu.com/a/1052165):
+
+```{bash, eval = FALSE}
+sudo apt-get install libgsl-dev
+```
+
+## Using the third-party libraries in `cling`
+
+We need to tell the interpreter where the third-party libraries are located. Following [xeus-cling#87](https://github.com/jupyter-xeus/xeus-cling/issues/87#issuecomment-349053121), the are three ways to include either specific libraries, oradding the path as well:
+
+- If you want to add a path to the include path:
+```{cc eval = FALSE}
+#pragma cling add_include_path("inc_directory")
+```
+- If you want to add a path to the library path:
+```{cc, eval = FALSE}
+#pragma cling add_library_path("lib_directory")
+```
+- If you want to load a library:
+```{cc, eval = FALSE}
+#pragma cling load("libname")
+```
+Note that you do not need to add the library extension (`.so`, '.lib`, or .`dylib`).
+
+A similar answer is given [here](https://stackoverflow.com/a/50291733). Basically, the binary code is loaded with `#pragma cling load(...)`, and `#include`
+
+## Example 1: using `libgsl` and `cling`
+
+Load the required libraries:
+
+```{cling, engine.opts = list(cling = 'ClearClingEnv'), error = TRUE}
+/* Tell cling to link the libraries */
+#pragma cling load("gsl")
+#pragma cling load("gslcblas")
+
+/* Load the libraries */
+#include <stdio.h>
+#include <gsl/gsl_statistics.h>
+```
+
+Create a data sample:
+
+```{cling}
+double data[5] = {17.2, 18.1, 16.5, 18.3, 12.6};
+```
+
+```{cling}
+printf("The dataset is %g, %g, %g, %g, %g\n",
+       data[0], data[1], data[2], data[3], data[4]);
+```
+
+Calculate some statistics for this data sample:
+
+```{cling}
+double mean, variance, largest, smallest;
+
+mean     = gsl_stats_mean(data, 1, 5);
+variance = gsl_stats_variance(data, 1, 5);
+largest  = gsl_stats_max(data, 1, 5);
+smallest = gsl_stats_min(data, 1, 5);
+```
+
+Print the results:
+
+```{cling}
+printf("The sample mean is %g\n", mean);
+printf("The estimated variance is %g\n", variance);
+printf("The largest value is %g\n", largest);
+printf("The smallest value is %g\n", smallest);
+```
+
+# Example 2 (not recommended)
+
+A `cling`-specific [metaprocessor](https://root.cern/cling/#metaprocessor) flag allows loading a library interactively (as described [here](https://stackoverflow.com/a/45679612)):
+
+```{cling, engine.opts = list(cling = 'ClearClingEnv'), error = TRUE}
+.L gsl
+
+#include <stdio.h>
+#include <gsl/gsl_statistics.h>
+```
+
+```{cling}
+double data[3] = {1.0, 2.0, 3.0};
+printf("The sample mean is %g\n", gsl_stats_mean(data, 1, 3));
+```
+
+The difference is that `Example 1` uses the [pragma](https://docs.microsoft.com/en-us/cpp/preprocessor/pragma-directives-and-the-pragma-keyword?view=msvc-160) directive, which is a compiler specific feature and is a bit closer to most general `C++` examples.
+
+# Example 3 (external program, experimental, not run)
+
+This example is more of a general idea, which follows [this answer on ROOT](https://root-forum.cern.ch/t/loading-libraries-in-a-cling-script/19973/2)
+
+The idea is to pack all of the preliminary libraries into a "script" of sorts. For example:
+
+- Create a file `prepareWorkspace.C` with the following code:
+
+```{c, eval = FALSE}
+#include "cling/Interpreter/Interpreter.h"
+
+void prepareWorkspace() {
+  gCling->loadFile("libgsl");
+  /*
+    Add any other libraries here, if needed.
+  */
+}
+```
+This file should be in the same directory, as the terminal, opened by `rstudioapi`.
+
+- Then, similarly to how we used `.L`, wenow use the `.x` command:
+
+```{cling, eval = FALSE}
+.x prepareWorkspace.C
+```
+
+From the [documentation](https://root.cern/cling/#metaprocessor):
+
+> `.x filename.cxx` - loads filename and calls `void filename()` if defined
