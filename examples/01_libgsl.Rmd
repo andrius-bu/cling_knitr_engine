@@ -142,7 +142,7 @@ void prepareWorkspace() {
 ```
 This file should be in the same directory, as the terminal, opened by `rstudioapi`.
 
-- Then, similarly to how we used `.L`, wenow use the `.x` command:
+- Then, similarly to how we used `.L`, we now use the `.x` command:
 
 ```{cling, eval = FALSE}
 .x prepareWorkspace.C
