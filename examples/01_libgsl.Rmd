@@ -39,7 +39,7 @@ Easiest way to install the library, as described [here](https://askubuntu.com/a/
 sudo apt-get install libgsl-dev
 ```
 
-## Using the third-party libraries in `cling`
+## Using third-party libraries in `cling`
 
 We need to tell the interpreter where the third-party libraries are located. Following [xeus-cling#87](https://github.com/jupyter-xeus/xeus-cling/issues/87#issuecomment-349053121), the are three ways to include either specific libraries, oradding the path as well:
 
@@ -63,7 +63,7 @@ A similar answer is given [here](https://stackoverflow.com/a/50291733). Basicall
 
 Load the required libraries:
 
-```{cling, engine.opts = list(cling = 'ClearClingEnv'), error = TRUE}
+```{cling, engine.opts = list(cling = list(clearEnv = TRUE)), error = TRUE}
 /* Tell cling to link the libraries */
 #pragma cling load("gsl")
 #pragma cling load("gslcblas")
@@ -108,7 +108,7 @@ printf("The smallest value is %g\n", smallest);
 
 A `cling`-specific [metaprocessor](https://root.cern/cling/#metaprocessor) flag allows loading a library interactively (as described [here](https://stackoverflow.com/a/45679612)):
 
-```{cling, engine.opts = list(cling = 'ClearClingEnv'), error = TRUE}
+```{cling, engine.opts = list(cling = list(clearEnv = TRUE)), error = TRUE}
 .L gsl
 
 #include <stdio.h>

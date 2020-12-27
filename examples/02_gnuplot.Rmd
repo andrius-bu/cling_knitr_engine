@@ -1,0 +1,156 @@
+---
+title: "Example: `cling` with `gnuplot-iostream`"
+output: 
+  html_document:
+    highlight: haddock
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+**Important!** knit this file by running `rmarkdown::render("02_gnuplot.Rmd")` inside the RStudio console.
+
+## Example engine (uses the RStudio API to call the terminal)
+
+Firstly, `cling` returns the errors colored with ANSI shell color codes. To return the colors, instead of the codes, we follow a solution posted in [crayon#24](https://github.com/r-lib/crayon/issues/24#issuecomment-581068792)
+.
+```{r color, echo = TRUE, results='asis'}
+# https://github.com/r-lib/crayon/issues/24#issuecomment-581068792
+# crayon needs to be explicitly activated in Rmd
+options(crayon.enabled = TRUE)
+# Hooks needs to be set to deal with outputs
+# thanks to fansi logic
+old_hooks <- fansi::set_knit_hooks(knitr::knit_hooks, 
+                                   which = c("output", "message", "error"))
+```
+
+Load our language engine:
+
+```{r}
+source("../src/cling.R")
+```
+
+## Installing `gnuplot` and `gnuplot-iostream`
+
+Easiest way to install the library, as described [here](https://stackoverflow.com/a/45699349:
+
+```{bash, eval = FALSE}
+# https://stackoverflow.com/a/45699349
+sudo apt-get install -y gnuplot
+# https://github.com/dstahlke/gnuplot-iostream
+sudo apt-get install -y libboost-all-dev
+cd /home/$USER/Apps/
+git clone https://github.com/dstahlke/gnuplot-iostream.git
+```
+
+## Using third-party libraries in `cling`
+
+We need to tell the interpreter where the third-party libraries are located. Following [xeus-cling#87](https://github.com/jupyter-xeus/xeus-cling/issues/87#issuecomment-349053121), the are three ways to include either specific libraries, oradding the path as well:
+
+- If you want to add a path to the include path:
+```{cc eval = FALSE}
+#pragma cling add_include_path("inc_directory")
+```
+- If you want to add a path to the library path:
+```{cc, eval = FALSE}
+#pragma cling add_library_path("lib_directory")
+```
+- If you want to load a library:
+```{cc, eval = FALSE}
+#pragma cling load("libname")
+```
+Note that you do not need to add the library extension (`.so`, '.lib`, or .`dylib`).
+
+A similar answer is given [here](https://stackoverflow.com/a/50291733). Basically, the binary code is loaded with `#pragma cling load(...)`, and `#include`
+
+## Specifying an appropriate version of `C++`
+
+`C++17` is **required** fo `gnuplot-iostream`! 
+
+In the chunk below, we pass the following engine options in `R`'s chunks:
+
+```{r, eval = FALSE}
+engine.opts = list(cling = list(clearEnv = TRUE, args = "-std=c++1z"))
+```
+
+We can then compare the `C++` versions, when we load `cling`.
+
+Without specifying a `C++` version:
+
+```{cling, engine.opts = list(cling = list(clearEnv = TRUE)), error = TRUE}
+__cplusplus
+```
+and when we pass `args = "-std=c++1z"`:
+
+```{cling, engine.opts = list(cling = list(clearEnv = TRUE, args = "-std=c++1z")), error = TRUE}
+__cplusplus
+```
+
+Here: 
+
+-`(long) 201103` indicates `C++11`; 
+- `(long) 201703` is `C++17`;
+- etc.
+
+## Loading `gnuplot-iostream` in `cling`
+
+Load the required libraries:
+
+```{cling, engine.opts = list(cling = list(clearEnv = TRUE, args = "-std=c++1z")), error = TRUE}
+#pragma cling add_include_path("/home/$USER/Apps/gnuplot-iostream")
+#pragma cling load("boost_iostreams")
+
+#include <vector>
+#include <cmath>
+#include <boost/tuple/tuple.hpp>
+#include "gnuplot-iostream.h"
+```
+
+# Example plots
+
+After loading the libraries, we can try to generate some basic plot examples. See [this](http://stahlke.org/dan/gnuplot-iostream/), [this](http://www.gnuplotting.org/output-terminals/), [this](https://stackoverflow.com/a/8608936), [this](https://sciencesoftcode.wordpress.com/2018/11/22/gnuplot-iostream-guide/) and [this](https://github.com/dstahlke/gnuplot-iostream/blob/master/example-data-1d.cc) for some additional examples.
+
+The following array-like containers are supported:
+
+- STL containers (e.g. `std::vector`, `std::array`) and anything with similar iterator interface.
+- `boost::array` and similar.
+- Other types can be added as per [this](https://stackoverflow.com/a/16153834) and [the documentation ](https://github.com/dstahlke/gnuplot-iostream/wiki/Datatypes).
+
+## Example 1
+
+Create a data sample:
+
+```{cling}
+std::vector<double> y_pts;
+for(int i=0; i<1000; i++) {
+    double y = (i/500.0-1) * (i/500.0-1);
+    y_pts.push_back(y);
+}
+```
+
+```{cling}
+for(int i = 0; i < 5; i++){
+  std::cout << y_pts[i] << ' ';
+}
+Gnuplot gp;
+gp << "set terminal png \n";
+gp << "set output 'example_gnuplot_1.png' \n";
+gp << "plot '-' with lines title 'vector of std::vector', sin(x/200) with lines title 'gnuplot sin() function'\n";
+gp.send(y_pts);
+gp.flush();
+```
+
+Which can save the image by adding the following code:
+
+```![](example_gnuplot_1.png)```
+
+However, this is currently turned off, as I am unsure of how to track the file names and save locations. Currently the start and end of each `cling` code chunk time is used to determine which `.jpg`, `jpeg`, `.png` or `.pdf` are created from the code. So, we can include the chart manually by specifying the name of the plots:
+
+![](example_gnuplot_1.png)
+
+Note that the file will be in use, so we should close the `cling` session, if we want to delete the generated chart.
+
+```{cling, engine.opts = list(cling = list(clearEnv = TRUE, args = "-std=c++1z")), echo = FALSE}
+;
+```

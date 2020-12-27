@@ -12,9 +12,10 @@ rstudioapi::terminalSend(ClingRStudioTerminal, "cling\n")
 
 # The knitr_engine for cling:
 knitr::knit_engines$set(cling = function(options) {
+  args <- ifelse(is.null(options$engine.opts$cling$args), "", options$engine.opts$cling$args)
   if(options$eval){
     # If we want to clear the environment - close the terminal and create a new one:
-    if(sum(options$engine.opts$cling == 'ClearClingEnv') == 1){
+    if(sum(options$engine.opts$cling$clearEnv) == 1){
       # Quit cling:
       rstudioapi::terminalSend(ClingRStudioTerminal, ".q\n")
       # Close the terminal
@@ -27,7 +28,7 @@ knitr::knit_engines$set(cling = function(options) {
         Sys.sleep(0.1)
       }
       # Start cling
-      rstudioapi::terminalSend(ClingRStudioTerminal, "cling\n")
+      rstudioapi::terminalSend(ClingRStudioTerminal, paste0("cling ", args, "\n"))
     }
     # https://cran.r-project.org/web/packages/rstudioapi/vignettes/terminal.html
     if (!rstudioapi::terminalRunning(ClingRStudioTerminal)) {
@@ -47,12 +48,16 @@ knitr::knit_engines$set(cling = function(options) {
     rstudioapi::terminalSend(ClingRStudioTerminal, ".1> RStudioClingOutputTMP_stdout.txt\n")
     rstudioapi::terminalSend(ClingRStudioTerminal, ".2> RStudioClingOutputTMP_sterr.txt\n")
     code <- paste(options$code, collapse = '\n')
-    rstudioapi::terminalSend(ClingRStudioTerminal, paste0(code, "\n"))
     
+    if((time_start <- Sys.time()) > 0){
+      # Only run the code AFTER assigning the start time:
+      rstudioapi::terminalSend(ClingRStudioTerminal, paste0(code, "\n"))
+    }
     # To obtain the results programmatically, wait for cling to finish saving:
     while(tail(rstudioapi::terminalBuffer(ClingRStudioTerminal), 1) != "[cling]$ "){
       Sys.sleep(0.1)
     }
+    time_end   <- Sys.time()
     
     suppressWarnings({
       # Read the output:
@@ -76,13 +81,57 @@ knitr::knit_engines$set(cling = function(options) {
     }
     # Remove the file
     # writeLines("", "RStudioClingOutputTMP.txt")
+    
+    
+    # Check if code created .png, .pdf, .jpg files:
+    # browser()
+    has_plots <- FALSE
+    # Temporary disable auto plot creation - unsure how to correctly 
+    # track the names and location of the files saved
+    if(FALSE & grepl("\\.png|\\.jpg|\\.jpeg|\\.pdf", code)){
+      # Get files of this type:
+      tmp_img_files <- list.files(pattern = "\\.png$|\\.jpg$|\\.jpeg$|\\.pdf$")
+      # Time difference between the image file modification time 
+      # and the time that the code was executed
+      # should be small
+      # TODO: improve this check
+      t_check <-  abs(time_start - file.info(tmp_img_files)$mtime - (time_end - time_start)) < 0.5
+      tmp_img_files <- tmp_img_files[t_check]
+      if(length(tmp_img_files) > 0){
+        has_plots <- TRUE
+      }else{
+        # browser()
+      }
+      
+    }
   }else{
     out <- ""
+    has_plots <- FALSE
+  }
+  
+  result <- list(code = "", out = out)
+  if(options$echo){
+    result$code <- options$code
   }
   
   # Add c++ highlighting:
   options$engine = 'cpp'
   
+  # browser()
   # Return the results:
-  knitr::engine_output(options, options$code, out)
+  if(has_plots){
+    plt_out <- knitr::engine_output(
+      options, 
+      out = list(knitr::include_graphics(tmp_img_files))
+    )
+    result <- knitr::engine_output(
+      options, 
+      code = result$code,
+      out = result$out
+    )
+    # browser()
+    return(paste0(result, plt_out, sep = "\n\n"))
+  }else{
+    knitr::engine_output(options, result$code, out = result$out)
+  }
 })

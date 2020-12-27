@@ -35,39 +35,38 @@ source("../src/cling.R")
 
 Call the engine a couple of times with code clearing:
 
-```{cling, engine.opts = list(cling = 'ClearClingEnv')}
+```{cling, engine.opts = list(cling = list(clearEnv = TRUE))}
 #include <stdio.h>
 
 printf("Hello World!\n");
 ```
 
-
-```{cling, engine.opts = list(cling = 'ClearClingEnv')}
-#include <stdio.h>
-
-printf("Hello World!\n");
+```{cling, engine.opts = list(cling = list(clearEnv = TRUE))}
+int x = 1;
+x
 ```
 
 
-```{cling, engine.opts = list(cling = 'ClearClingEnv')}
-#include <stdio.h>
-
-printf("Hello World!\n");
+```{cling, engine.opts = list(cling = list(clearEnv = TRUE))}
+int x = 2;
+x
 ```
 
 Next, call one without any code clearing:
 
 ```{cling}
-printf("Testing...\n");
+x += 1;
+x
 ```
 
 ```{cling}
-printf("Testing...\n");
+x *= 2;
+x
 ```
 
-Next, clear the environment again (se the `engine.opts` in the `.Rmd` file for the code chunk below), and run the code below:
+Next, clear the environment again (see the `engine.opts` in the `.Rmd` file for the code chunk below), and run the code below:
 
-```{cling, engine.opts = list(cling = 'ClearClingEnv')}
+```{cling, engine.opts = list(cling = list(clearEnv = TRUE))}
 #include <stdio.h>
 
 printf("Hello World!\n");
@@ -88,11 +87,11 @@ x += 1;
 x
 ```
 
-## Example - with error
+## Example - with errors
 
 If an error is encountered - the lines in the code chunk are undone with the `.undo [n]` command. Below contains an example, when we try to define `x` twice, as well as call an undefined variable `y`
 
-```{cling, engine.opts = list(cling = 'ClearClingEnv'), error = TRUE}
+```{cling, engine.opts = list(cling = list(clearEnv = TRUE)), error = TRUE}
 int x = 1;
 x
 int x = 2;
@@ -132,3 +131,29 @@ z
 ```
 
 See [ROOT files](https://root.cern.ch/root/html534/guides/users-guide/InputOutput.html) for an idea on the possible solutions for variable cache creation.
+
+## Example - defining functions
+
+We can define multiple functions in a single chunk:
+
+```{cling, engine.opts = list(cling = list(clearEnv = TRUE)), error = TRUE}
+#include <iostream>
+
+void greet() {
+    std::cout << "Hello World";
+}
+
+int add (int a, int b) {
+   return (a + b);
+}
+```
+And (as long as we do not start e new session), we can call them:
+
+```{cling}
+greet();
+```
+
+```{cling}
+int sum = add(1, 5);
+sum
+```
